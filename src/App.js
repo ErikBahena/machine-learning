@@ -1,20 +1,12 @@
 import React from "react"
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
+import Layout from "./components/layout/Layout"
 
-import ImageClassification from "./components/image-classification/ImageClassification"
-import Home from "./components/Home"
+import { BrowserRouter as Router } from "react-router-dom"
 
 export default function App() {
   return (
     <Router>
-      <Routes>
-        <Route
-          exact
-          path="/image-classification"
-          element={<ImageClassification />}
-        />
-        <Route exact path="/" element={<Home />} />
-      </Routes>
+      <Layout />
     </Router>
   )
 }
