@@ -6,11 +6,12 @@ import AppBarMain from "./AppBar"
 
 import DefaultExample from "../home"
 import ImageClassification from "../image-classification"
+import VideoClassification from "../video-classification"
 
 export const previewNavTabsId = "preview-nav-tabs"
 
 const Navigation = () => {
-  const [currentPath, setCurrentPath] = React.useState("/")
+  const [currentPath, setCurrentPath] = React.useState(window.location.pathname)
   const [drawerOpen, setDrawerOpen] = React.useState(false)
 
   const navigate = useNavigate()
@@ -36,6 +37,7 @@ const Navigation = () => {
         >
           <Tab label="Home" value="/" />
           <Tab label="Image Classification" value="/image-classification" />
+          <Tab label="Video Classification" value="/video-classification" />
         </Tabs>
       </AppBar>
 
@@ -44,6 +46,10 @@ const Navigation = () => {
           <Route
             path="/image-classification"
             element={<ImageClassification />}
+          />
+          <Route
+            path="/video-classification"
+            element={<VideoClassification />}
           />
           <Route path="/" element={<DefaultExample />} />
           <Route path="*" element={<div>hello</div>} />
