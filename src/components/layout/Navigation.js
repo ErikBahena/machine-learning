@@ -7,6 +7,7 @@ import AppBarMain from "./AppBar"
 import DefaultExample from "../home"
 import ImageClassification from "../image-classification"
 import VideoClassification from "../video-classification"
+import ObjectClassification from "../object-classification"
 
 export const previewNavTabsId = "preview-nav-tabs"
 
@@ -38,6 +39,7 @@ const Navigation = () => {
           <Tab label="Home" value="/" />
           <Tab label="Image Classification" value="/image-classification" />
           <Tab label="Video Classification" value="/video-classification" />
+          <Tab label="Object Classification" value="/object-classification" />
         </Tabs>
       </AppBar>
 
@@ -51,8 +53,11 @@ const Navigation = () => {
             path="/video-classification"
             element={<VideoClassification />}
           />
+          <Route
+            path="/object-classification"
+            element={<ObjectClassification />}
+          />
           <Route path="/" element={<DefaultExample />} />
-          <Route path="*" element={<div>hello</div>} />
         </Routes>
       </Container>
     </>

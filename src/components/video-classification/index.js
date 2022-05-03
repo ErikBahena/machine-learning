@@ -47,7 +47,7 @@ export default function VideoClassification() {
   useEffect(() => {
     if (!mobileNet) return
 
-    setInterval(() => {
+    const interval = setInterval(async () => {
       mobileNet
         .classify()
         .then((res) => {
@@ -56,7 +56,9 @@ export default function VideoClassification() {
         .catch((err) => {
           console.error(err)
         })
-    }, 1000)
+    }, 2000)
+
+    return () => clearInterval(interval)
   }, [mobileNet])
 
   return (
@@ -76,7 +78,7 @@ export default function VideoClassification() {
           <Card style={{ maxWidth: "max-content" }}>
             <CardMedia
               component="video"
-              autoPlay
+              autoPlay={false}
               ref={videoEl}
               alt="Your webcam"
             />
