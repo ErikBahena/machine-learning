@@ -3,10 +3,9 @@ import {
   Card,
   CardMedia,
   Divider,
-  CardActions,
-  Button,
-  Input,
+  Slider,
   Grid,
+  Button,
 } from "@material-ui/core"
 
 import { useEffect, useState, useRef } from "react"
@@ -16,7 +15,6 @@ export default function VideoClassification() {
   const videoEl = useRef(null)
 
   const [mobileNet, setMobileNet] = useState(null)
-
   const [predictions, setPredictions] = useState([])
 
   useEffect(() => {
@@ -24,21 +22,20 @@ export default function VideoClassification() {
 
     const initializeModel = async () => {
       const classifier = await ml5.imageClassifier("MobileNet", video)
-
-      return setMobileNet(classifier)
+      setMobileNet(classifier)
     }
 
     const initializeVideoStream = async () => {
-      if (navigator.mediaDevices.getUserMedia) {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-        })
-        if (!stream) return console.error(stream)
+      if (!navigator.mediaDevices.getUserMedia)
+        return console.error("No Webcam detected")
 
-        video.srcObject = stream
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+      })
 
-        if (stream.active) return classifyVideo()
-      }
+      if (!stream) return console.error(stream)
+
+      video.srcObject = stream
     }
 
     ;(async () => {
@@ -47,11 +44,20 @@ export default function VideoClassification() {
     })()
   }, [])
 
-  const classifyVideo = async () => {
-    const res = await mobileNet.classify(videoEl.current, 4)
+  useEffect(() => {
+    if (!mobileNet) return
 
-    setPredictions(res)
-  }
+    setInterval(() => {
+      mobileNet
+        .classify()
+        .then((res) => {
+          setPredictions(res)
+        })
+        .catch((err) => {
+          console.error(err)
+        })
+    }, 1000)
+  }, [mobileNet])
 
   return (
     <>
@@ -64,43 +70,20 @@ export default function VideoClassification() {
         Video classification with your webcam from Ml5
       </Typography>
       <Divider style={{ marginBottom: "2%" }} />
-      <Typography
-        variant="h5"
-        style={{
-          margin: "15px 0px",
-        }}
-      >
-        Webcam:
-      </Typography>
 
       <Grid container spacing={5}>
-        <Grid item>
+        <Grid item xs={5}>
           <Card style={{ maxWidth: "max-content" }}>
             <CardMedia
               component="video"
               autoPlay
               ref={videoEl}
-              style={{ height: "auto", maxWidth: "500px" }}
               alt="Your webcam"
             />
-
-            {/* <Divider /> */}
-            {/* <CardActions>
-              <Button
-                color="primary"
-                fullWidth
-                variant="text"
-                component="label"
-                aria-label="upload picture"
-                onClick={classifyVideo}
-              >
-                Classify
-              </Button>
-            </CardActions> */}
           </Card>
         </Grid>
 
-        <Grid item>
+        <Grid item xs={6}>
           {videoEl.current && (
             <Typography variant="h5" style={{ marginBottom: "15px" }}>
               Predictions
@@ -119,6 +102,27 @@ export default function VideoClassification() {
               )
             })}
         </Grid>
+        {/* <Grid item sx={6}>
+          <Typography variant="h6" id="discrete-slider">
+            Set The Classification Rate
+          </Typography>
+          <Typography variant="subtitle1" gutterBottom>
+            Current Rate: 1 prediction every {predictionRate}{" "}
+            {predictionRate === 1 ? "second" : "seconds"}
+          </Typography>
+
+          <Slider
+            defaultValue={1}
+            aria-labelledby="discrete-slider"
+            step={1}
+            marks
+            onChange={(_, newPredictionRate) =>
+              setPredictionRate(newPredictionRate)
+            }
+            min={1}
+            max={5}
+          />
+        </Grid> */}
       </Grid>
     </>
   )
