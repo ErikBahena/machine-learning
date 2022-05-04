@@ -9,57 +9,47 @@ import {
 } from "@material-ui/core"
 
 import { useEffect, useState, useRef } from "react"
+
+import Webcam from "react-webcam"
+
 import ml5 from "ml5"
 
 export default function VideoClassification() {
-  const videoEl = useRef(null)
+  const webcamRef = useRef(null)
 
-  const [mobileNet, setMobileNet] = useState(null)
   const [predictions, setPredictions] = useState([])
 
+  const initializeModel = async () => {
+    let detectionInterval
+
+    const classifier = await ml5.imageClassifier(
+      "MobileNet",
+      webcamRef.current.video
+    )
+
+    if (
+      typeof webcamRef.current === "undefined" &&
+      webcamRef.current === null &&
+      webcamRef.current.video.readyState !== 4
+    )
+      return
+
+    detectionInterval = setInterval(async () => {
+      let res = await classifier.classify()
+
+      setPredictions(res)
+    }, 1000 / 2)
+
+    return () => {
+      if (detectionInterval) {
+        clearInterval(detectionInterval)
+      }
+    }
+  }
+
   useEffect(() => {
-    let video = videoEl.current
-
-    const initializeModel = async () => {
-      const classifier = await ml5.imageClassifier("MobileNet", video)
-      setMobileNet(classifier)
-    }
-
-    const initializeVideoStream = async () => {
-      if (!navigator.mediaDevices.getUserMedia)
-        return console.error("No Webcam detected")
-
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-      })
-
-      if (!stream) return console.error(stream)
-
-      video.srcObject = stream
-    }
-
-    ;(async () => {
-      await initializeModel()
-      await initializeVideoStream()
-    })()
+    initializeModel()
   }, [])
-
-  useEffect(() => {
-    if (!mobileNet) return
-
-    const interval = setInterval(async () => {
-      mobileNet
-        .classify()
-        .then((res) => {
-          setPredictions(res)
-        })
-        .catch((err) => {
-          console.error(err)
-        })
-    }, 2000)
-
-    return () => clearInterval(interval)
-  }, [mobileNet])
 
   return (
     <>
@@ -76,24 +66,19 @@ export default function VideoClassification() {
       <Grid container spacing={5}>
         <Grid item xs={5}>
           <Card style={{ maxWidth: "max-content" }}>
-            <CardMedia
-              component="video"
-              autoPlay={false}
-              ref={videoEl}
-              alt="Your webcam"
-            />
+            <Webcam ref={webcamRef} width="100%" />
           </Card>
         </Grid>
 
         <Grid item xs={6}>
-          {videoEl.current && (
+          {webcamRef.current && (
             <Typography variant="h5" style={{ marginBottom: "15px" }}>
               Predictions
             </Typography>
           )}
 
           {predictions.length > 0 &&
-            videoEl.current &&
+            webcamRef.current &&
             predictions.map((prediction, i) => {
               return (
                 <p key={i}>
